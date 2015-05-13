@@ -11,4 +11,5 @@ RUN npm install redis  socket.io datamaps express
 
 EXPOSE 80
 VOLUME ["/opt/code"]
+COPY code /opt/code
 CMD ["nodejs" , "/opt/code/app.js"]
