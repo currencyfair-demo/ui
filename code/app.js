@@ -2,11 +2,12 @@ var app = require('http').createServer(handler)
 var io = require('socket.io')(app);
 var fs = require('fs');
 var redis = require('redis'),
-	client = redis.createClient(6379, 'redis');
+	client1 = redis.createClient(6379, 'redis');
+	client2 = redis.createClient(6379, 'redis');
 
 app.listen(80, '0.0.0.0');
 
-client.SUBSCRIBE('trnx');
+client1.SUBSCRIBE('trnx');
 
 function handler (req, res) {
   fs.readFile(__dirname + '/index.html',
@@ -22,7 +23,17 @@ function handler (req, res) {
 }
 
 io.on('connection', function (socket) {
-  client.on('message', function(channel, message) {
+  /**
+   * Send the latest transactions to initialize the map
+   */
+  client2.lrange('transactions', function(err, values) {
+	if(err) {
+		return;
+	}
+	socket.emit('init', values);
+  });
+
+  client1.on('message', function(channel, message) {
 	socket.emit('trxn', message);
   })
 });

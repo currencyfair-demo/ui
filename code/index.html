@@ -189,22 +189,19 @@ var countries = {
 		'PRC': '#2ca02c',
 		'IND': '#e377c2',
 		'GBR': '#8c564b',
-		'FRA': '#d62728',
+		'FRA': 'blue',
 		'PAK': '#7f7f7f',
-		defaultFill: '#EDDC4E'
+		defaultFill: '#abdda4'
 	    },
 	});
-  var socket = io.connect('http://ui.poovelil.org');
-  var bubbles = [];
-  var threshold = 10;
-  socket.on('trxn', function(data) {
-	data = JSON.parse(data);
+
+  function getBubbleData(data) {
 	var country = countries[data.originatingCountry];
 	if(!country) {
 		console.log(data.originatingCountry + "  not present in the list");
 		return;
 	}
-	bubbles.push({
+	return {
 		latitude: country[1],
 		longitude:  country[2],
 		radius: 10,
@@ -212,7 +209,29 @@ var countries = {
 		currencyFrom : data.currencyFrom,
 		currencyTo: data.currencyTo,
 		date : data.timePlaced,
+};
+  }
+  var socket = io.connect('http://ui.poovelil.org');
+  var bubbles = [];
+  var threshold = 10;
+  socket.on('init', function(data) {
+	data = JSON.parse(data);
+	for(var i = 0 ; i < data.length; i++) {
+		bubbles.push(getBubbleData(data));
+	}
+	map.bubbles(bubbles,{
+		popupTemplate: function (geo, data) { 
+	            return ['<div class="hoverinfo">' +  data.name,
+        	    '<br/>Selling: ' +  data.currencyFrom + ' ',
+	            '<br/>Buying: ' +  data.currencyTo + '',
+         	   '<br/>Date: ' +  data.date + '',
+	            '</div>'].join('');
+		}
 	});
+  });
+  socket.on('trxn', function(data) {
+	data = JSON.parse(data);
+	bubbles.push(getBubbleData(data));
 	if(bubbles.length > threshold) {
 		bubbles.shift();
 	}
