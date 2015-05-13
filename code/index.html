@@ -207,7 +207,7 @@ var countries = {
 	return {
 		latitude: country[1],
 		longitude:  country[2],
-		radius: 10,
+		radius: 3,
 		fillKey : 'FRA',
 		currencyFrom : data.currencyFrom,
 		amountSell : data.amountSell,
@@ -220,6 +220,7 @@ var countries = {
   var socket = io.connect('http://ui.poovelil.org');
   var bubbles = [];
   var threshold = 10;
+  var lastCountry = '';
   socket.on('init', function(data) {
 	for(var i = 0 ; i < data.length; i++) {
 		bubbles.push(getBubbleData(data[i]));
@@ -237,10 +238,21 @@ var countries = {
   });
   socket.on('trxn', function(data) {
 	data = JSON.parse(data);
+
+	var  a = {};
+	var country = countries[data.originatingCountry][0];
+	a[country] = '#0fa0fa';
+	if(lastCountry) {
+		a[lastCountry] = '#abdda4'
+	}
+	lastCountry = country;
+	map.updateChoropleth(a);
+
 	bubbles.push(getBubbleData(data));
 	if(bubbles.length > threshold) {
 		bubbles.shift();
 	}
+	console.log(bubbles);
 
 	map.bubbles(bubbles,{
 		popupTemplate: function (geo, data) { 
@@ -252,6 +264,7 @@ var countries = {
 	            '</div>'].join('');
 		}
 	});
+
   });
 </script>
 </body>
