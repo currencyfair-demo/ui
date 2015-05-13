@@ -26,7 +26,7 @@ io.on('connection', function (socket) {
   /**
    * Send the latest transactions to initialize the map
    */
-  client2.lrange('transactions', function(err, values) {
+  client2.lrange('transactions', 0, -1, function(err, values) {
 	if(err) {
 		return;
 	}

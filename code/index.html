@@ -196,6 +196,9 @@ var countries = {
 	});
 
   function getBubbleData(data) {
+	if(typeof data == "string") {
+		data = JSON.parse(data);
+	}
 	var country = countries[data.originatingCountry];
 	if(!country) {
 		console.log(data.originatingCountry + "  not present in the list");
@@ -207,6 +210,9 @@ var countries = {
 		radius: 10,
 		fillKey : 'FRA',
 		currencyFrom : data.currencyFrom,
+		amountSell : data.amountSell,
+		amountBuy : data.amountBuy,
+		rate	: data.rate,
 		currencyTo: data.currencyTo,
 		date : data.timePlaced,
 };
@@ -215,15 +221,15 @@ var countries = {
   var bubbles = [];
   var threshold = 10;
   socket.on('init', function(data) {
-	data = JSON.parse(data);
 	for(var i = 0 ; i < data.length; i++) {
-		bubbles.push(getBubbleData(data));
+		bubbles.push(getBubbleData(data[i]));
 	}
 	map.bubbles(bubbles,{
 		popupTemplate: function (geo, data) { 
-	            return ['<div class="hoverinfo">' +  data.name,
-        	    '<br/>Selling: ' +  data.currencyFrom + ' ',
-	            '<br/>Buying: ' +  data.currencyTo + '',
+	            return ['<div class="hoverinfo">',
+        	    'Selling: ' + data.amountSell  + ' ' +   data.currencyFrom + ' ',
+		    '<br/>@ ' + data.rate + ' ',
+	            '<br/>Buying: ' +  data.amountBuy + data.currencyTo + ' ',
          	   '<br/>Date: ' +  data.date + '',
 	            '</div>'].join('');
 		}
@@ -238,9 +244,10 @@ var countries = {
 
 	map.bubbles(bubbles,{
 		popupTemplate: function (geo, data) { 
-	            return ['<div class="hoverinfo">' +  data.name,
-        	    '<br/>Selling: ' +  data.currencyFrom + ' ',
-	            '<br/>Buying: ' +  data.currencyTo + '',
+	            return ['<div class="hoverinfo">',
+        	    'Selling: ' + data.amountSell  + ' ' +   data.currencyFrom + ' ',
+		    '<br/>@ ' + data.rate + ' ',
+	            '<br/>Buying: ' +  data.amountBuy + data.currencyTo + ' ',
          	   '<br/>Date: ' +  data.date + '',
 	            '</div>'].join('');
 		}
