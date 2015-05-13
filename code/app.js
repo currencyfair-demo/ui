@@ -8,11 +8,6 @@ app.listen(80, '0.0.0.0');
 
 client.SUBSCRIBE('trnx');
 
-client.on("subscribe", function(channel, count){
-	console.log('');
-});
-
-
 function handler (req, res) {
   fs.readFile(__dirname + '/index.html',
   function (err, data) {
@@ -27,11 +22,6 @@ function handler (req, res) {
 }
 
 io.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
-  });
-  
   client.on('message', function(channel, message) {
 	socket.emit('trxn', message);
   })

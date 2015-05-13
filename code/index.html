@@ -194,13 +194,17 @@ var countries = {
 		defaultFill: '#EDDC4E'
 	    },
 	});
-</script>
-<script>
   var socket = io.connect('http://ui.poovelil.org');
+  var bubbles = [];
+  var threshold = 10;
   socket.on('trxn', function(data) {
 	data = JSON.parse(data);
 	var country = countries[data.originatingCountry];
-	map.bubbles([{
+	if(!country) {
+		console.log(data.originatingCountry + "  not present in the list");
+		return;
+	}
+	bubbles.push({
 		latitude: country[1],
 		longitude:  country[2],
 		radius: 10,
@@ -208,7 +212,12 @@ var countries = {
 		currencyFrom : data.currencyFrom,
 		currencyTo: data.currencyTo,
 		date : data.timePlaced,
-	}],{
+	});
+	if(bubbles.length > threshold) {
+		bubbles.shift();
+	}
+
+	map.bubbles(bubbles,{
 		popupTemplate: function (geo, data) { 
 	            return ['<div class="hoverinfo">' +  data.name,
         	    '<br/>Selling: ' +  data.currencyFrom + ' ',
